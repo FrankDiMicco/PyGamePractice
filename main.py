@@ -25,6 +25,9 @@ step_y = 0
 # Movement speed
 movement_speed = .075
 
+# Define the red rectangle platform
+platform = pygame.Rect(200, 250, 100, 20)
+
 running = True
 while running:
     for event in pygame.event.get():
@@ -64,11 +67,17 @@ while running:
     elif y_pos < 0:
         y_pos = screen_height
 
+    # Check for collision - the "-5" is to prevent premature collision
+    if platform.colliderect(pygame.Rect(x_pos, y_pos, image.get_width()-5, image.get_height()-5)):
+        # Collision occurred
+        print("Collision!")
+
     # Clear the screen
     screen.fill((0, 0, 0))
 
     # Blit the image onto the screen at the updated position
     screen.blit(image, (x_pos, y_pos))
+    platform = pygame.draw.rect(screen, (255,0,0), (200, 250, 100, 20))
 
     # Update the display
     pygame.display.flip()
