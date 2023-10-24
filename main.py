@@ -23,7 +23,7 @@ step_x = 0
 step_y = 0
 
 # Movement speed
-movement_speed = .075
+movement_speed = 0.05
 
 # Define the red rectangle platform
 platform = pygame.Rect(200, 250, 100, 20)
@@ -53,31 +53,55 @@ while running:
         step_y = 0
 
     # Update the position of the sprite
-    x_pos += step_x
-    y_pos += step_y
+    new_x = x_pos + step_x
+    new_y = y_pos + step_y
 
     # Check if the sprite is still on screen, if not, wrap around
-    if x_pos > screen_width:
-        x_pos = 0
-    elif x_pos < 0:
-        x_pos = screen_width
+    if new_x > screen_width:
+        new_x = 0
+    elif new_x < 0:
+        new_x = screen_width
 
-    if y_pos > screen_height:
-        y_pos = 0
-    elif y_pos < 0:
-        y_pos = screen_height
+    if new_y > screen_height:
+        new_y = 0
+    elif new_y < 0:
+        new_y = screen_height
 
-    # Check for collision - the "-5" is to prevent premature collision
-    if platform.colliderect(pygame.Rect(x_pos, y_pos, image.get_width()-5, image.get_height()-5)):
+    # Create a new rect for the updated sprite position
+    sprite_rect = pygame.Rect(new_x, new_y, image.get_width() - 10, image.get_height() - 15)
+
+    # Check for collision along the y-axis
+    if sprite_rect.colliderect(platform):
         # Collision occurred
-        print("Collision!")
+        # Check if the sprite is coming from above the platform
+        if step_y > 0 and sprite_rect.top < platform.top:
+            # Adjust the y position to sit on the platform
+            new_y = platform.top - image.get_height()
+        elif step_y < 0 and sprite_rect.bottom > platform.bottom:
+            # Adjust the y position to sit below the platform
+            new_y = platform.bottom
+
+    # Check for collision along the x-axis (horizontal)
+    if sprite_rect.colliderect(platform):
+        # Collision occurred along the x-axis
+        # Adjust the x position to prevent passing through the platform
+        if step_x > 0:
+            new_x = platform.left - image.get_width()
+        elif step_x < 0:
+            new_x = platform.right
+
+    # Update the position of the sprite
+    x_pos = new_x
+    y_pos = new_y
 
     # Clear the screen
     screen.fill((0, 0, 0))
 
     # Blit the image onto the screen at the updated position
     screen.blit(image, (x_pos, y_pos))
-    platform = pygame.draw.rect(screen, (255,0,0), (200, 250, 100, 20))
+
+    # Draw the red rectangle platform
+    pygame.draw.rect(screen, (255, 0, 0), platform)
 
     # Update the display
     pygame.display.flip()
